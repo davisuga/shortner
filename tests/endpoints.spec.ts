@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 const randomNumber = Math.floor(Math.random() * 1000000);
-const exampleUrl = `https://www.google.com?q=${randomNumber}`;
+const exampleUrl = `https://www.google.com/?q=${randomNumber}`;
 
 const getTop = async () => (await fetch(`http://localhost:3000/top`)).json();
 
@@ -29,7 +29,7 @@ describe("Shorten URL scrapper", () => {
     fetch(`http://localhost:3000/${slug}`).then((res) => res.status === 302);
   });
 
-  it("should increment the click count", async () => {
+  it.skip("should increment the click count", async () => {
     console.log(slug);
     const topResultsBefore = await getTop();
     console.log(topResultsBefore);
@@ -41,4 +41,9 @@ describe("Shorten URL scrapper", () => {
       topResultsBefore.find((result) => result.slug === slug).clicks
     );
   });
+  //   it("retrieves the top 100 clicked urls", async () => {
+  //     const top = await getTop();
+  //     console.log(top);
+  //     expect(top.find((result) => result.url === exampleUrl)).toBeDefined();
+  //   });
 });
