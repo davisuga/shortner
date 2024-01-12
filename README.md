@@ -7,8 +7,9 @@ This is a simple url shortner that uses a postgres database to store the urls an
 ## Setup
 
 1. Clone the repo
-2. Start postgres using `docker run -p 5432:5432 -e POSTGRES_PASSWORD=1234 postgres`
-3. Install dependencies using `pnpm install`
+2. Install pnpm using `npm i -g pnpm`
+3. Start postgres using `docker run -p 5432:5432 -e POSTGRES_PASSWORD=1234 postgres`
+4. Install dependencies using `pnpm install`
 
 
 ## Running the API
@@ -44,11 +45,13 @@ redirect to the full url
 [
   {
     "url": "https://google.com",
-    "title": "Google"
+    "title": "Google",
+    "clicks": 2
   },
   {
     "url": "https://youtube.com",
-    "title": "YouTube"
+    "title": "YouTube",
+    "clicks": 1
   }
 ]
 ```
