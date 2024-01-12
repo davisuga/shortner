@@ -5,20 +5,31 @@ import { getPageTitle } from "./lib/getPageTitle";
 const prisma = new PrismaClient();
 const app = express();
 
+type ShortenPayload = {
+  url: string;
+};
+
 app.use(express.json());
 
 // Define REST API routes here
 
-app.listen(3000, () =>
-  console.log("REST API server ready at: http://localhost:3000")
-);
-app.get("/health", (req, res) => {
-  res.send("OK");
-});
+app.get("/top", async (req, res) => {
+  const result = await prisma.url.findMany({
+    orderBy: {
+      clicks: "desc",
+    },
+    take: 100,
+    select: {
+      url: true,
+      title: true,
+      clicks: true,
+      slug: true,
+    },
+  });
 
-type ShortenPayload = {
-  url: string;
-};
+  const top = result.sort((a, b) => b.clicks - a.clicks);
+  res.json(top);
+});
 
 const validateShorterPayload = (payload: ShortenPayload) => {
   const newUrl = new URL(payload.url);
@@ -29,12 +40,19 @@ app.post("/shorten", async (req, res) => {
   const { url } = req.body;
   const title = await getPageTitle(url);
   if (!title) throw new Error("No title found");
+  const validatedUrl = validateShorterPayload({ url });
 
-  const result = await prisma.url.create({
-    data: {
+  const result = await prisma.url.upsert({
+    create: {
       slug: randomUUID().slice(0, 8),
-      url: validateShorterPayload({ url }),
+      url: validatedUrl,
       title,
+    },
+    update: {
+      title,
+    },
+    where: {
+      url,
     },
   });
 
@@ -69,19 +87,6 @@ app.get("/:slug", async (req, res) => {
   res.redirect(result.url);
 });
 
-app.get("/top", async (req, res) => {
-  const result = await prisma.url.findMany({
-    orderBy: {
-      clicks: "desc",
-    },
-    take: 100,
-    select: {
-      url: true,
-      title: true,
-      clicks: true,
-    },
-  });
-
-  const top = result.sort((a, b) => b.clicks - a.clicks);
-  res.json(top);
-});
+app.listen(3000, () =>
+  console.log("REST API server ready at: http://localhost:3000")
+);
